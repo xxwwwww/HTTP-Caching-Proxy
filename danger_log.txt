@@ -1,0 +1,14 @@
+We mostly implemented our proxy with RAII in mind, such that everything is on the stack.
+However, we do notice that some network-related aspects of the system may fail, such as:
+- server shutdown during in-complete receive
+- connect/accept failure
+- invalid HTTP message
+- in-accurate Content-Length
+
+We handle these situations by using try-catch statements such that while operations may fail, we throw
+ an error immediately after the failure and everything returns to their original state and there will be no
+ memory leak since they are allocated on the stack. Plus, we use mutexes to make sure that the writes and reads
+ from/to cache are logically atomic.
+
+In this way, we believe we achieved a strong exception guarantee by taking no side effects from failure and leaving
+ original values intact
